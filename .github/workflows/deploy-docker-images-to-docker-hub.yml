@@ -1,0 +1,41 @@
+name: Deploy docker images to Docker Hub
+
+on:
+  workflow_dispatch:
+
+jobs:
+  push_image:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        swift_version:
+          - 5.6
+          - 5.5
+        tag:
+          - master
+          - 0.46.5
+
+    steps:
+      -
+        name: Check out the repo
+        uses: actions/checkout@v2
+      - 
+        name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - 
+        name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          build-args: |
+            BUILDER_IMAGE=swift:${{ matrix.swift_version }}
+            RUNTIME_IMAGE=swift:${{ matrix.swift_version }}
+            SWIFTLINT_REVISION=${{ matrix.tag }}
+          context: .
+          push: true
+          tags: |
+            tenshiamd/swiftlint:${{ matrix.tag }}
+            tenshiamd/swiftlint:${{ matrix.tag }}_swift-${{ matrix.swift_version }}
