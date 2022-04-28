@@ -6,15 +6,25 @@ on:
 jobs:
   push_image:
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
+        experimental: [false]
         swift_version:
-          - 5.6
           - 5.5
         tag:
-          - master
           - 0.46.5
+        include:
+          - experimental: true
+            swift_version: 5.6
+            tag: "master"
+          - experimental: true
+            swift_version: 5.5
+            tag: "master"
+          - experimental: true
+            swift_version: 5.6
+            tag: "0.46.5"
 
     steps:
       -
